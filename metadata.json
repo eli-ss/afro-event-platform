@@ -1,0 +1,6 @@
+{
+  "name": "Afro Event Design System",
+  "description": "A premium African-inspired university event platform connecting students, researchers, and organizers with beautiful paperless ticketing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
