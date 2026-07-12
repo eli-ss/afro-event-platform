@@ -8,7 +8,7 @@ import {
   Search, MapPin, Calendar, Plus, ChevronRight, Mail, ArrowRight, Check,
   Sparkles, Shield, User, LogOut, CheckCircle2, ChevronDown, Menu, X, Info,
   Laptop, Briefcase, Music, GraduationCap, Heart, Pizza, ShieldAlert, Award, Ticket,
-  ChevronLeft, HelpCircle, Facebook, Linkedin, Send, MessageSquare
+  ChevronLeft, HelpCircle, Facebook, Linkedin, Send, MessageSquare, LayoutDashboard
 } from "lucide-react";
 import AfroEventLogo from "./AfroEventLogo";
 import { INITIAL_EVENTS, FEATURED_ORGANIZERS, Event } from "./mockEvents";
@@ -140,30 +140,58 @@ const TESTIMONIALS = [
 interface AfroEventHomeProps {
   onToggleStyleGuide: () => void;
   showStyleGuideToggle: boolean;
+  // Lifted global states
+  user?: any;
+  setUser?: (userData: any) => void;
+  events?: Event[];
+  setEvents?: React.Dispatch<React.SetStateAction<Event[]>>;
+  registeredEventIds?: string[];
+  setRegisteredEventIds?: React.Dispatch<React.SetStateAction<string[]>>;
+  savedEventIds?: string[];
+  setSavedEventIds?: React.Dispatch<React.SetStateAction<string[]>>;
+  onNavigateToDashboard?: () => void;
 }
 
 export default function AfroEventHome({
   onToggleStyleGuide,
-  showStyleGuideToggle
+  showStyleGuideToggle,
+  user: propUser,
+  setUser: propSetUser,
+  events: propEvents,
+  setEvents: propSetEvents,
+  registeredEventIds: propRegisteredEventIds,
+  setRegisteredEventIds: propSetRegisteredEventIds,
+  savedEventIds: propSavedEventIds,
+  setSavedEventIds: propSetSavedEventIds,
+  onNavigateToDashboard
 }: AfroEventHomeProps) {
-  // State Management
-  const [events, setEvents] = React.useState<Event[]>(INITIAL_EVENTS);
+  // Fallback states for standalone execution
+  const [localEvents, setLocalEvents] = React.useState<Event[]>(INITIAL_EVENTS);
+  const events = propEvents !== undefined ? propEvents : localEvents;
+  const setEvents = propSetEvents !== undefined ? propSetEvents : setLocalEvents;
+
+  const [localUser, setLocalUser] = React.useState<any | null>(null);
+  const user = propUser !== undefined ? propUser : localUser;
+  const setUser = propSetUser !== undefined ? propSetUser : setLocalUser;
+
+  const [localRegisteredEventIds, setLocalRegisteredEventIds] = React.useState<string[]>([]);
+  const registeredEventIds = propRegisteredEventIds !== undefined ? propRegisteredEventIds : localRegisteredEventIds;
+  const setRegisteredEventIds = propSetRegisteredEventIds !== undefined ? propSetRegisteredEventIds : setLocalRegisteredEventIds;
+
+  const [localSavedEventIds, setLocalSavedEventIds] = React.useState<string[]>([]);
+  const savedEventIds = propSavedEventIds !== undefined ? propSavedEventIds : localSavedEventIds;
+  const setSavedEventIds = propSetSavedEventIds !== undefined ? propSetSavedEventIds : setLocalSavedEventIds;
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCity, setSelectedCity] = React.useState("All Africa");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
   const [selectedDate, setSelectedDate] = React.useState("");
-  
-  // User Authentication State - Initial state is NULL per the "Replace profile with Login/Sign Up" instruction
-  const [user, setUser] = React.useState<{ name: string; email: string; avatar: string } | null>(null);
 
   // Modal control states
   const [isAuthOpen, setIsAuthOpen] = React.useState(false);
   const [authMode, setAuthMode] = React.useState<"login" | "signup">("login");
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [selectedEventForDetail, setSelectedEventForDetail] = React.useState<Event | null>(null);
-
-  // Tracker for registered event IDs
-  const [registeredEventIds, setRegisteredEventIds] = React.useState<string[]>([]);
 
   // Interactive menu states
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -368,6 +396,16 @@ export default function AfroEventHome({
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
+                          if (onNavigateToDashboard) onNavigateToDashboard();
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-bold text-charcoal-700 hover:bg-[#F97316]/5 hover:text-[#C04E22] transition-colors flex items-center gap-2 cursor-pointer"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-[#F97316]" /> User Dashboard
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setUserDropdownOpen(false);
                           setIsCreateOpen(true);
                         }}
                         className="w-full text-left px-4 py-2.5 text-xs font-semibold text-charcoal-700 hover:bg-neutral-50 hover:text-charcoal-900 transition-colors flex items-center gap-2 cursor-pointer"
@@ -504,7 +542,7 @@ export default function AfroEventHome({
 
             {/* Auth area for Mobile */}
             {user ? (
-              <div className="bg-neutral-50 p-3.5 rounded-2xl border border-charcoal-150 flex items-center justify-between">
+              <div className="bg-neutral-50 p-3.5 rounded-2xl border border-charcoal-150 flex flex-col gap-3">
                 <div className="flex items-center gap-2">
                   <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover" />
                   <div>
@@ -512,16 +550,27 @@ export default function AfroEventHome({
                     <span className="text-[10px] text-charcoal-500 block truncate max-w-[150px]">{user.email}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setUser(null);
-                    setRegisteredEventIds([]);
-                  }}
-                  className="text-xs font-bold text-red-600 hover:underline p-1 cursor-pointer"
-                >
-                  Log Out
-                </button>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      if (onNavigateToDashboard) onNavigateToDashboard();
+                    }}
+                    className="py-1.5 px-3 text-center text-[10px] font-bold bg-[#F97316] text-white rounded-full font-display cursor-pointer"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setUser(null);
+                      setRegisteredEventIds([]);
+                    }}
+                    className="py-1.5 px-3 text-center text-[10px] font-bold bg-neutral-100 text-red-600 rounded-full font-display cursor-pointer border border-charcoal-200"
+                  >
+                    Log Out
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 pt-2">

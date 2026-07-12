@@ -16,6 +16,8 @@ import SystemSpecs from "./components/SystemSpecs";
 import ResponsiveSpec from "./components/ResponsiveSpec";
 import EventBuilder from "./components/EventBuilder";
 import AfroEventHome from "./components/AfroEventHome";
+import UserDashboard from "./components/UserDashboard";
+import { INITIAL_EVENTS, Event } from "./components/mockEvents";
 import { Sparkles, ArrowLeft, Flame, AlertTriangle } from "lucide-react";
 
 const SECTIONS = [
@@ -32,8 +34,14 @@ const SECTIONS = [
 ];
 
 export default function App() {
-  const [currentView, setCurrentView] = React.useState<"home" | "design-system">("home");
+  const [currentView, setCurrentView] = React.useState<"home" | "design-system" | "dashboard">("home");
   const [activeSection, setActiveSection] = React.useState("logo-concept");
+
+  // Unified global state engine
+  const [user, setUser] = React.useState<any | null>(null);
+  const [events, setEvents] = React.useState<Event[]>(INITIAL_EVENTS);
+  const [registeredEventIds, setRegisteredEventIds] = React.useState<string[]>([]);
+  const [savedEventIds, setSavedEventIds] = React.useState<string[]>([]);
 
   // Simple scroll spy logic for design system
   React.useEffect(() => {
@@ -59,9 +67,54 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentView]);
 
+  if (currentView === "dashboard") {
+    return (
+      <UserDashboard 
+        user={user}
+        setUser={setUser}
+        events={events}
+        setEvents={setEvents}
+        registeredEventIds={registeredEventIds}
+        setRegisteredEventIds={setRegisteredEventIds}
+        savedEventIds={savedEventIds}
+        setSavedEventIds={setSavedEventIds}
+        onNavigateToHome={() => {
+          setCurrentView("home");
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }}
+        onCreateEventClick={() => {
+          setCurrentView("home");
+          setTimeout(() => {
+            const feed = document.getElementById("events-feed");
+            if (feed) feed.scrollIntoView({ behavior: "smooth" });
+          }, 150);
+        }}
+        onViewEventDetail={(evt) => {
+          setCurrentView("home");
+          setTimeout(() => {
+            const feed = document.getElementById("events-feed");
+            if (feed) feed.scrollIntoView({ behavior: "smooth" });
+          }, 150);
+        }}
+      />
+    );
+  }
+
   if (currentView === "home") {
     return (
       <AfroEventHome 
+        user={user}
+        setUser={setUser}
+        events={events}
+        setEvents={setEvents}
+        registeredEventIds={registeredEventIds}
+        setRegisteredEventIds={setRegisteredEventIds}
+        savedEventIds={savedEventIds}
+        setSavedEventIds={setSavedEventIds}
+        onNavigateToDashboard={() => {
+          setCurrentView("dashboard");
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }}
         onToggleStyleGuide={() => {
           setCurrentView("design-system");
           window.scrollTo({ top: 0, behavior: "instant" });
