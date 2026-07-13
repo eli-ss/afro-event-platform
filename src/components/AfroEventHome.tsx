@@ -1452,6 +1452,16 @@ export default function AfroEventHome({
         isAlreadyRegistered={selectedEventForDetail ? registeredEventIds.includes(selectedEventForDetail.id) : false}
         userName={user?.name}
         userEmail={user?.email}
+        allEvents={events}
+        savedEventIds={savedEventIds}
+        onToggleSave={(id) => {
+          if (savedEventIds.includes(id)) {
+            setSavedEventIds(prev => prev.filter(x => x !== id));
+          } else {
+            setSavedEventIds(prev => [...prev, id]);
+          }
+        }}
+        onSelectEvent={(evt) => setSelectedEventForDetail(evt)}
       />
 
     </div>

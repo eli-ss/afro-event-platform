@@ -17,6 +17,7 @@ import ResponsiveSpec from "./components/ResponsiveSpec";
 import EventBuilder from "./components/EventBuilder";
 import AfroEventHome from "./components/AfroEventHome";
 import UserDashboard from "./components/UserDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 import { INITIAL_EVENTS, Event } from "./components/mockEvents";
 import { Sparkles, ArrowLeft, Flame, AlertTriangle } from "lucide-react";
 
@@ -33,8 +34,57 @@ const SECTIONS = [
   { id: "event-builder", label: "Interactive Builder", icon: "Sparkles" }
 ];
 
+function GlobalViewSwitcher({ currentView, setCurrentView }: { currentView: string; setCurrentView: (view: any) => void }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 font-sans">
+      <div className="relative flex flex-col items-end gap-2">
+        {isOpen && (
+          <div className="bg-[#171717] border border-neutral-800 text-white rounded-2xl p-3.5 shadow-2xl flex flex-col gap-1.5 w-60 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <span className="text-[10px] font-mono tracking-widest text-[#F97316] font-black uppercase mb-1.5 px-1.5 block">⚡ Platform Switcher</span>
+            {[
+              { id: "home", label: "Afro Event Home", role: "Public Homepage" },
+              { id: "dashboard", label: "User Dashboard", role: "Attendee Account" },
+              { id: "admin", label: "Admin Dashboard", role: "SaaS Control Panel" },
+              { id: "design-system", label: "Brand Design System", role: "Colors & Design Specs" }
+            ].map(view => (
+              <button
+                key={view.id}
+                onClick={() => {
+                  setCurrentView(view.id);
+                  setIsOpen(false);
+                  window.scrollTo({ top: 0, behavior: "instant" });
+                }}
+                className={`w-full flex flex-col items-start px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left ${
+                  currentView === view.id
+                    ? "bg-gradient-to-r from-[#F97316] to-[#E5630F] text-white font-bold"
+                    : "hover:bg-neutral-800 text-neutral-300 hover:text-white"
+                }`}
+              >
+                <span className="leading-tight">{view.label}</span>
+                <span className={`text-[9px] font-mono leading-none mt-0.5 ${currentView === view.id ? "text-white/80" : "text-neutral-500"}`}>{view.role}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="bg-neutral-950 hover:bg-[#F97316] text-white border border-neutral-850 hover:border-[#F97316]/50 h-11 px-5 rounded-full flex items-center gap-2 shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-all text-xs font-bold"
+        >
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          Platform Navigator
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const [currentView, setCurrentView] = React.useState<"home" | "design-system" | "dashboard">("home");
+  const [currentView, setCurrentView] = React.useState<"home" | "design-system" | "dashboard" | "admin">("home");
   const [activeSection, setActiveSection] = React.useState("logo-concept");
 
   // Unified global state engine
@@ -69,58 +119,80 @@ export default function App() {
 
   if (currentView === "dashboard") {
     return (
-      <UserDashboard 
-        user={user}
-        setUser={setUser}
-        events={events}
-        setEvents={setEvents}
-        registeredEventIds={registeredEventIds}
-        setRegisteredEventIds={setRegisteredEventIds}
-        savedEventIds={savedEventIds}
-        setSavedEventIds={setSavedEventIds}
-        onNavigateToHome={() => {
-          setCurrentView("home");
-          window.scrollTo({ top: 0, behavior: "instant" });
-        }}
-        onCreateEventClick={() => {
-          setCurrentView("home");
-          setTimeout(() => {
-            const feed = document.getElementById("events-feed");
-            if (feed) feed.scrollIntoView({ behavior: "smooth" });
-          }, 150);
-        }}
-        onViewEventDetail={(evt) => {
-          setCurrentView("home");
-          setTimeout(() => {
-            const feed = document.getElementById("events-feed");
-            if (feed) feed.scrollIntoView({ behavior: "smooth" });
-          }, 150);
-        }}
-      />
+      <>
+        <UserDashboard 
+          user={user}
+          setUser={setUser}
+          events={events}
+          setEvents={setEvents}
+          registeredEventIds={registeredEventIds}
+          setRegisteredEventIds={setRegisteredEventIds}
+          savedEventIds={savedEventIds}
+          setSavedEventIds={setSavedEventIds}
+          onNavigateToHome={() => {
+            setCurrentView("home");
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          onCreateEventClick={() => {
+            setCurrentView("home");
+            setTimeout(() => {
+              const feed = document.getElementById("events-feed");
+              if (feed) feed.scrollIntoView({ behavior: "smooth" });
+            }, 150);
+          }}
+          onViewEventDetail={(evt) => {
+            setCurrentView("home");
+            setTimeout(() => {
+              const feed = document.getElementById("events-feed");
+              if (feed) feed.scrollIntoView({ behavior: "smooth" });
+            }, 150);
+          }}
+        />
+        <GlobalViewSwitcher currentView={currentView} setCurrentView={setCurrentView} />
+      </>
+    );
+  }
+
+  if (currentView === "admin") {
+    return (
+      <>
+        <AdminDashboard 
+          events={events}
+          setEvents={setEvents}
+          onLogout={() => {
+            setCurrentView("home");
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+        />
+        <GlobalViewSwitcher currentView={currentView} setCurrentView={setCurrentView} />
+      </>
     );
   }
 
   if (currentView === "home") {
     return (
-      <AfroEventHome 
-        user={user}
-        setUser={setUser}
-        events={events}
-        setEvents={setEvents}
-        registeredEventIds={registeredEventIds}
-        setRegisteredEventIds={setRegisteredEventIds}
-        savedEventIds={savedEventIds}
-        setSavedEventIds={setSavedEventIds}
-        onNavigateToDashboard={() => {
-          setCurrentView("dashboard");
-          window.scrollTo({ top: 0, behavior: "instant" });
-        }}
-        onToggleStyleGuide={() => {
-          setCurrentView("design-system");
-          window.scrollTo({ top: 0, behavior: "instant" });
-        }}
-        showStyleGuideToggle={false}
-      />
+      <>
+        <AfroEventHome 
+          user={user}
+          setUser={setUser}
+          events={events}
+          setEvents={setEvents}
+          registeredEventIds={registeredEventIds}
+          setRegisteredEventIds={setRegisteredEventIds}
+          savedEventIds={savedEventIds}
+          setSavedEventIds={setSavedEventIds}
+          onNavigateToDashboard={() => {
+            setCurrentView("dashboard");
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          onToggleStyleGuide={() => {
+            setCurrentView("design-system");
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          showStyleGuideToggle={false}
+        />
+        <GlobalViewSwitcher currentView={currentView} setCurrentView={setCurrentView} />
+      </>
     );
   }
 
@@ -257,6 +329,7 @@ export default function App() {
           </div>
         </div>
       </main>
+      <GlobalViewSwitcher currentView={currentView} setCurrentView={setCurrentView} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { Event } from "./mockEvents";
 import AfroEventLogo from "./AfroEventLogo";
+import { MyTicketsDashboard, TicketDetailsView, TicketRegistration } from "./RegistrationTicketFlow";
 
 interface UserDashboardProps {
   user: any;
@@ -57,6 +58,7 @@ export default function UserDashboard({
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedTicket, setSelectedTicket] = React.useState<TicketRegistration | null>(null);
 
   // Edit Profile States
   const [profileForm, setProfileForm] = React.useState({
@@ -1057,146 +1059,20 @@ export default function UserDashboard({
                   4. TAB: MY TICKETS (PASSES)
                   ======================================================= */}
               {activeTab === "tickets" && (
-                <div className="flex flex-col gap-6">
-                  <div className="border-b border-charcoal-200 pb-5">
-                    <h2 className="text-2xl font-display font-black text-charcoal-900">Your Gye Nyame Active Passes</h2>
-                    <p className="text-xs text-charcoal-650 mt-1">
-                      Show these unique Gye Nyame watermarked paperless passes at the gates for instant verification.
-                    </p>
-                  </div>
-
-                  {myRegisteredEvents.length === 0 ? (
-                    <div className="bg-white rounded-3xl border border-charcoal-200 p-12 text-center max-w-lg mx-auto flex flex-col items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-charcoal-100 flex items-center justify-center text-charcoal-500">
-                        <Ticket className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-display font-bold text-charcoal-950 text-base">No Active Passes</h4>
-                        <p className="text-xs text-charcoal-600 mt-1.5 leading-relaxed">
-                          You haven't reserved or registered for any university seminars or conferences yet. Tickets are completely free! Secure yours in seconds.
-                        </p>
-                      </div>
-                      <button
-                        onClick={onNavigateToHome}
-                        className="px-5 py-2.5 bg-[#F97316] hover:bg-[#E5630F] text-white text-xs font-bold rounded-full transition-colors cursor-pointer"
-                      >
-                        Register for Events
-                      </button>
-                    </div>
+                <div className="w-full">
+                  {selectedTicket ? (
+                    <TicketDetailsView
+                      ticket={selectedTicket}
+                      event={events.find(e => e.id === selectedTicket.eventId)!}
+                      onBack={() => setSelectedTicket(null)}
+                    />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {myRegisteredEvents.map(evt => (
-                        <div 
-                          key={`ticket-card-${evt.id}`}
-                          className="bg-white rounded-3xl border border-charcoal-200 overflow-hidden shadow-md flex flex-col justify-between relative group"
-                        >
-                          {/* Ticket Top Banner Color Stripe */}
-                          <div className="h-2.5 w-full bg-gradient-to-r from-[#F97316] via-[#E5A93B] to-[#059669]" />
-
-                          <div className="p-6 flex flex-col sm:flex-row gap-6 relative">
-                            {/* Watermark Logo Background */}
-                            <div className="absolute right-4 bottom-4 w-28 h-28 opacity-[0.035] pointer-events-none select-none z-0">
-                              {/* Gye Nyame Symbol */}
-                              <svg viewBox="0 0 100 100" fill="none" stroke="#2B1E16" strokeWidth="8" className="w-full h-full">
-                                <path d="M 50 15 A 35 35 0 1 0 50 85 A 35 35 0 1 0 50 15 Z M 50 15 L 50 85 M 20 50 L 80 50" />
-                                <path d="M 28 28 L 72 72 M 72 28 L 28 72" strokeWidth="6" />
-                                <circle cx="50" cy="50" r="10" fill="#2B1E16" />
-                              </svg>
-                            </div>
-
-                            {/* QR Section */}
-                            <div className="flex flex-col items-center shrink-0 border border-neutral-100 p-3 bg-neutral-50 rounded-2xl z-10 w-fit self-center">
-                              {/* QR Code Graphic */}
-                              <div className="w-24 h-24 bg-white p-1 rounded-lg border border-charcoal-200 flex items-center justify-center relative">
-                                <svg className="w-full h-full text-charcoal-900" viewBox="0 0 100 100" fill="currentColor">
-                                  {/* Render standard visual representation of a QR Code */}
-                                  <rect x="5" y="5" width="25" height="25" />
-                                  <rect x="10" y="10" width="15" height="15" fill="white" />
-                                  <rect x="13" y="13" width="9" height="9" />
-                                  
-                                  <rect x="70" y="5" width="25" height="25" />
-                                  <rect x="75" y="10" width="15" height="15" fill="white" />
-                                  <rect x="78" y="13" width="9" height="9" />
-                                  
-                                  <rect x="5" y="70" width="25" height="25" />
-                                  <rect x="10" y="75" width="15" height="15" fill="white" />
-                                  <rect x="13" y="78" width="9" height="9" />
-
-                                  <rect x="40" y="5" width="5" height="35" />
-                                  <rect x="50" y="15" width="15" height="10" />
-                                  <rect x="40" y="55" width="10" height="20" />
-                                  <rect x="55" y="45" width="25" height="15" />
-                                  <rect x="80" y="70" width="15" height="15" />
-                                  <rect x="45" y="80" width="20" height="15" />
-                                  
-                                  {/* Center symbol small overlay */}
-                                  <rect x="45" y="45" width="10" height="10" fill="#F97316" />
-                                </svg>
-                              </div>
-                              <span className="text-[8px] font-mono font-bold tracking-widest text-[#F97316] uppercase mt-2">PASS SECURE</span>
-                              <span className="text-[7px] font-mono text-charcoal-400 mt-0.5">#{evt.id.toUpperCase()}</span>
-                            </div>
-
-                            {/* Ticket Details */}
-                            <div className="flex-1 min-w-0 z-10 flex flex-col justify-between gap-3">
-                              <div>
-                                <span className="text-[8px] font-mono tracking-widest font-bold bg-[#059669]/10 text-[#059669] border border-[#059669]/25 px-2.5 py-0.5 rounded-full uppercase w-fit block">
-                                  {evt.category}
-                                </span>
-                                <h3 className="font-display font-bold text-sm sm:text-base text-charcoal-900 group-hover:text-[#F97316] transition-colors leading-tight mt-1.5">
-                                  {evt.title}
-                                </h3>
-                                <p className="text-xs text-charcoal-800 font-bold mt-1.5 flex items-center gap-1">
-                                  <Laptop className="w-3.5 h-3.5 text-emerald-600" />
-                                  {evt.university}
-                                </p>
-                              </div>
-
-                              <div className="flex flex-col gap-1 text-[11px] text-charcoal-500 font-medium">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-3.5 h-3.5 text-[#F97316]" />
-                                  <span>{evt.date} • {evt.time}</span>
-                                </div>
-                                <div className="flex items-start gap-1">
-                                  <MapPin className="w-3.5 h-3.5 text-charcoal-400 shrink-0 mt-0.5" />
-                                  <span className="truncate">{evt.location.split(", ")[0]}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Tear off dotted border divider */}
-                          <div className="relative flex items-center my-0.5 select-none pointer-events-none">
-                            <span className="absolute -left-3.5 w-6 h-6 rounded-full bg-[#FDFBF7] border-r border-charcoal-200" />
-                            <div className="w-full border-t border-dashed border-charcoal-200" />
-                            <span className="absolute -right-3.5 w-6 h-6 rounded-full bg-[#FDFBF7] border-l border-charcoal-200" />
-                          </div>
-
-                          {/* Ticket Actions Stub Footer */}
-                          <div className="px-6 py-4 bg-neutral-50/70 border-t border-charcoal-100 flex flex-wrap items-center justify-between gap-3 z-10">
-                            <div className="flex items-center gap-1.5 text-[11px] text-charcoal-600">
-                              <span className="font-bold">Attendee:</span>
-                              <span className="font-semibold truncate max-w-[120px]">{profileForm.name}</span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleCancelRSVP(evt.id)}
-                                className="px-3 py-1.5 text-[10px] font-mono text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md font-bold uppercase transition-colors cursor-pointer border border-transparent hover:border-red-200"
-                              >
-                                Cancel Pass
-                              </button>
-                              <button
-                                onClick={() => alert("Digital pass download triggered! Pass saved to campus wallet.")}
-                                className="px-4 py-1.5 bg-black hover:bg-[#F97316] text-white text-[10px] font-mono font-bold rounded-full transition-all cursor-pointer uppercase flex items-center gap-1"
-                              >
-                                Download Wallet
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <MyTicketsDashboard
+                      events={events}
+                      registeredEventIds={registeredEventIds}
+                      onSelectTicket={(ticket) => setSelectedTicket(ticket)}
+                      onNavigateToExplore={onNavigateToHome}
+                    />
                   )}
                 </div>
               )}
